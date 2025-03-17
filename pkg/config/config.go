@@ -9,23 +9,23 @@ import (
 )
 
 type config struct {
-	SERVER_PORT       string
-	DB_TYPE           string
-	DB_HOST           string
-	DB_PORT           string
-	DB_USER           string
-	DB_PASSWORD       string
-	DB_NAME           string
-	CONNECTION_STRING string
-	SECRET_KEY        string
-	REFRESH_KEY       string
+	ServerPort       string
+	DbType           string
+	DbHost           string
+	DbPort           string
+	DbUser           string
+	DbPassword       string
+	DbName           string
+	ConnectionString string
+	SecretKey        string
+	RefreshKey       string
 	// RESEND_API_KEY    string
 	// UPTRACE_DSN       string
-	GIN_MODE              string
-	REDIS_URL             string
-	DB_MAX_IDLE_CONNS     string
-	DB_MAX_OPEN_CONNS     string
-	DB_MAX_LIFETIME_CONNS string
+	GinMode            string
+	RedisUrl           string
+	DbMaxIdleConns     string
+	DbMaxOpenConns     string
+	DbMaxLifetimeConns string
 }
 
 var Envs = initConfigs()
@@ -35,23 +35,23 @@ func initConfigs() config {
 		log.Println("Warning: No .env file found or failed to load. Using default environment variables.")
 	}
 	return config{
-		SERVER_PORT:       getEnv("SERVER_PORT", "8000"),
-		DB_TYPE:           getEnv("DB_TYPE", "postgresql"),
-		DB_HOST:           getEnv("DB_HOST", "localhost"),
-		DB_PORT:           getEnv("DB_PORT", "5432"),
-		DB_USER:           getEnv("DB_USER", "postgres"),
-		DB_PASSWORD:       getEnv("DB_PASSWORD", "postgres"),
-		DB_NAME:           getEnv("DB_NAME", "todoApp"),
-		CONNECTION_STRING: getEnv("CONNECTION_STRING", ""),
-		SECRET_KEY:        getEnv("SECRET_KEY", "https://acte.ltd/utils/randomkeygen"),
-		REFRESH_KEY:       getEnv("REFRESH_KEY", "https://randomkeygen.com/"),
+		ServerPort:       getEnv("SERVER_PORT", "8000"),
+		DbType:           getEnv("DB_TYPE", "postgresql"),
+		DbHost:           getEnv("DB_HOST", "localhost"),
+		DbPort:           getEnv("DB_PORT", "5432"),
+		DbUser:           getEnv("DB_USER", "postgres"),
+		DbPassword:       getEnv("DB_PASSWORD", "postgres"),
+		DbName:           getEnv("DB_NAME", "todoApp"),
+		ConnectionString: getEnv("CONNECTION_STRING", ""),
+		SecretKey:        getEnv("SECRET_KEY", "https://acte.ltd/utils/randomkeygen"),
+		RefreshKey:       getEnv("REFRESH_KEY", "https://randomkeygen.com/"),
 		// RESEND_API_KEY:    getEnv("RESEND_API_KEY", ""),
 		// UPTRACE_DSN:       getEnv("UPTRACE_DSN", ""),
-		GIN_MODE:              getEnv("GIN_MODE", "release"),
-		REDIS_URL:             getEnv("REDIS_URL", "localhost:6379"),
-		DB_MAX_IDLE_CONNS:     getEnv("DB_MAX_IDLE_CONNS", "10"),
-		DB_MAX_OPEN_CONNS:     getEnv("DB_MAX_OPEN_CONNS", "10"),
-		DB_MAX_LIFETIME_CONNS: getEnv("DB_MAX_LIFETIME_CONNS", "10"),
+		GinMode:            getEnv("GIN_MODE", "release"),
+		RedisUrl:           getEnv("REDIS_URL", "localhost:6379"),
+		DbMaxIdleConns:     getEnv("DB_MAX_IDLE_CONNS", "10"),
+		DbMaxOpenConns:     getEnv("DB_MAX_OPEN_CONNS", "10"),
+		DbMaxLifetimeConns: getEnv("DB_MAX_LIFETIME_CONNS", "10"),
 	}
 }
 

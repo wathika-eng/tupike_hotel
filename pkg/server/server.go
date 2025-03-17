@@ -20,7 +20,7 @@ type Server struct {
 
 func NewServer() *http.Server {
 	NewServer := &Server{
-		port: config.Envs.SERVER_PORT,
+		port: config.Envs.ServerPort,
 		db: func() database.DBService {
 			db, err := database.NewDatabase()
 			if err != nil {
@@ -29,6 +29,9 @@ func NewServer() *http.Server {
 			return db
 		}(),
 	}
+	//migrations.Migrate(NewServer.db.GetDB())
+	//migrations.Drop(NewServer.db.GetDB())
+	defer log.Printf("serving on http://localhost:%v\n", NewServer.port)
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", NewServer.port),
 		Handler:      NewServer.SetupRoutes(),

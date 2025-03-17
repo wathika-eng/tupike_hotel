@@ -36,23 +36,23 @@ func NewDatabase() (DBService, error) {
 
 func initDB() (*service, error) {
 	var dsn string
-	if envs.CONNECTION_STRING == "" {
+	if envs.ConnectionString == "" {
 		dsn = fmt.Sprintf("%v://%v:%v@%v:%v/%v",
-			envs.DB_TYPE, envs.DB_USER, envs.DB_PASSWORD,
-			envs.DB_HOST, envs.DB_PORT, envs.DB_NAME)
+			envs.DbType, envs.DbUser, envs.DbPassword,
+			envs.DbHost, envs.DbPort, envs.DbName)
 	} else {
-		dsn = envs.CONNECTION_STRING
+		dsn = envs.ConnectionString
 	}
 	log.Println(dsn)
 
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 	if sqldb == nil {
-		return nil, fmt.Errorf("Failed to create SQL DB connection")
+		return nil, fmt.Errorf("failed to create SQL DB connection")
 
 	}
 	if err := sqldb.Ping(); err != nil {
 		sqldb.Close()
-		return nil, fmt.Errorf("Error connecting to the database: %v", err.Error())
+		return nil, fmt.Errorf("error connecting to the database: %v", err.Error())
 	}
 	// if err := health(sqldb); err != nil {
 	// 	log.Fatal(err)
@@ -76,3 +76,4 @@ func (s *service) Close() error {
 	log.Printf("Disconnected from database: %s", s.db)
 	return s.db.Close()
 }
+

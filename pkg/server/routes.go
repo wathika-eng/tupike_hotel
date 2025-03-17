@@ -2,8 +2,10 @@ package server
 
 import (
 	"net/http"
+	logger "tupike_hotel/pkg/middleware"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // type response struct {
@@ -12,7 +14,10 @@ import (
 // }
 
 func (s *Server) SetupRoutes() http.Handler {
-	r := gin.Default()
+	e := echo.New()
+	e.Use(middleware.Recover())
+	// e.Use(middleware.Logger())
+	e.Use(logger.LoggerMiddleware)
 	// r.Use(cors.New(cors.Config{
 	// 	AllowOrigins:     []string{"*"},
 	// 	AllowMethods:     []string{"GET", "DELETE", "POST", "PATCH"},
@@ -22,14 +27,14 @@ func (s *Server) SetupRoutes() http.Handler {
 	// 	MaxAge:           12 * time.Hour,
 	// }))
 
-	r.GET("/", s.healthChecker)
+	e.GET("/", s.healthChecker)
 
-	return r
+	return e
 }
 
-func (s *Server) healthChecker(c *gin.Context) {
+func (s *Server) healthChecker(c echo.Context) error {
 
-	c.JSON(http.StatusOK, gin.H{
+	return c.JSON(http.StatusOK, echo.Map{
 		"Status":  http.StatusOK,
 		"Results": s.db.Health(),
 	})

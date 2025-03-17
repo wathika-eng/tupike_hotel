@@ -15,9 +15,9 @@ func (s *service) Health() map[string]string {
 	// Configure database connection settings
 	//maxLifeConns, _ := strconv.Atoi(envs.DB_MAX_LIFETIME_CONNS)
 	//s.db.SetConnMaxLifetime(time.Duration(maxLifeConns) * time.Second)
-	maxIdleConns, _ := strconv.Atoi(envs.DB_MAX_IDLE_CONNS)
+	maxIdleConns, _ := strconv.Atoi(envs.DbMaxIdleConns)
 	s.db.SetMaxIdleConns(maxIdleConns)
-	maxOpenConns, _ := strconv.Atoi(envs.DB_MAX_OPEN_CONNS)
+	maxOpenConns, _ := strconv.Atoi(envs.DbMaxOpenConns)
 	s.db.SetMaxOpenConns(maxOpenConns)
 
 	stats := make(map[string]string)
