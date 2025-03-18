@@ -42,6 +42,7 @@ func SetupRoutes(db database.DBService) http.Handler {
 	api := e.Group("/api")
 	{
 		api.POST("/signup", handler.CreateUser)
+		api.POST("/login", handler.LoginUser)
 	}
 	return e
 }

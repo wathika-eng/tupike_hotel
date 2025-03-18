@@ -17,10 +17,18 @@ func (s *Service) Validate(i any) error {
 
 func (s *Service) GetValidationErrors(err error) map[string]string {
 	validationErrors := make(map[string]string)
+
 	if ve, ok := err.(validator.ValidationErrors); ok {
 		for _, fe := range ve {
-			validationErrors[fe.Field()] = fmt.Sprintf("Validation failed for field '%s' with tag '%s'", fe.Field(), fe.Tag())
+			validationErrors[fe.Field()] = fmt.Sprintf(
+				"The field '%s' failed validation with the rule '%s'",
+				fe.Field(),
+				fe.Tag(),
+			)
 		}
+	} else {
+		validationErrors["error"] = err.Error()
 	}
+
 	return validationErrors
 }

@@ -26,8 +26,8 @@ func NewServer() *http.Server {
 		db:      db,
 		handler: routes.SetupRoutes(db),
 	}
-	//migrations.Migrate(NewServer.db.GetDB())
-	//migrations.Drop(NewServer.db.GetDB())
+	//migrations.Migrate(db.GetDB())
+	// migrations.Drop(db.GetDB())
 	defer log.Printf("serving on http://localhost:%v\n", NewServer.port)
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", NewServer.port),

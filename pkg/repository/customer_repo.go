@@ -15,6 +15,7 @@ type Repository struct {
 
 type RepoInterface interface {
 	InsertCustomer(ctx context.Context, user *types.Customer) error
+	LookUpCustomer(ctx context.Context, email string) error
 }
 
 func NewRepository(db *bun.DB) RepoInterface {
@@ -25,10 +26,14 @@ func NewRepository(db *bun.DB) RepoInterface {
 
 func (r Repository) InsertCustomer(ctx context.Context, user *types.Customer) error {
 	_, err := r.db.NewInsert().Model(user).Exec(ctx)
-	
+
 	if err != nil {
 		return errors.New(fmt.Sprintf("error inserting new user to the database: %v", err.Error()))
 	}
 	return nil
 }
 
+func (r Repository) LookUpCustomer(ctx context.Context, email string) error {
+	var user types.Customer
+	return r.db.NewSelect().Model(&user).Where("email = ?", email).Scan(ctx)
+}

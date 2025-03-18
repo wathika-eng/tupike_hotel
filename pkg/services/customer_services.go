@@ -18,6 +18,7 @@ type Service struct {
 
 type ServiceInterface interface {
 	CreateNewCustomer(ctx context.Context, user *types.Customer) error
+	LoginCustomer(ctx context.Context, email string) error
 	Validate(i any) error
 	GetValidationErrors(err error) map[string]string
 }
@@ -43,6 +44,13 @@ func (s *Service) CreateNewCustomer(ctx context.Context, user *types.Customer) e
 	return nil
 }
 
+func (s *Service) LoginCustomer(ctx context.Context, email string) error {
+	err := s.repo.LookUpCustomer(context.Background(), email)
+	if err != nil {
+		return errors.New("user not found on the database")
+	}
+	return nil
+}
 func hashPassword(password string) (string, error) {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
