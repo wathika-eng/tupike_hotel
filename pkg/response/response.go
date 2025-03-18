@@ -1,20 +1,16 @@
-package response
+package resp
 
 import (
-	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 )
 
 type Response struct {
 	Code  int    `json:"code"`
-	Data  any    `json:"data"`
+	Data  any    `json:"data,omitempty"`
 	Error string `json:"error,omitempty"`
 }
 
-type CustomValidator struct {
-	validator *validator.Validate
-}
-
+// JSONResponse standardizes API responses.
 func JSONResponse(c echo.Context, code int, data any, err error) error {
 	response := Response{Code: code}
 	if err != nil {

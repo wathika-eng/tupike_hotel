@@ -34,7 +34,7 @@ func NewServer() *http.Server {
 	defer log.Printf("serving on http://localhost:%v\n", NewServer.port)
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%s", NewServer.port),
-		Handler:      NewServer.SetupRoutes(),
+		Handler:      NewServer.SetupRoutes(NewServer.db.GetDB()),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
