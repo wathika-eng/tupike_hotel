@@ -1,12 +1,9 @@
 package types
 
 import (
-	"github.com/go-playground/validator"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/uptrace/bun"
 )
 
@@ -19,7 +16,7 @@ type Customer struct {
 	Password      string    `json:"-" validate:"required,min=8" bun:"password,notnull"`
 	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	IsAdmin       bool      `json:"is_admin" bun:"is_admin,notnull,default:false"`
-	Orders        []Order   `bun:"rel:has-many,join:id=customer_id"`
+	Orders        []Order   `json:"orders" bun:"rel:has-many,join:id=customer_id"`
 }
 
 type FoodItem struct {
@@ -46,15 +43,4 @@ type Order struct {
 	Discount       float64   `json:"discount" bun:"discount,notnull,default:0"`
 	Customer       *Customer `bun:"rel:belongs-to,join:customer_id=id"`
 	FoodItem       *FoodItem `bun:"rel:belongs-to,join:food_id=id"`
-}
-
-type CustomValidator struct {
-	Validator *validator.Validate
-}
-
-func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.Validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return nil
 }

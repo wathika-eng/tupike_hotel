@@ -1,20 +1,25 @@
-package server
+package routes
 
 import (
 	"net/http"
+	"tupike_hotel/pkg/database"
+	"tupike_hotel/pkg/handlers"
 	logger "tupike_hotel/pkg/middleware"
 	"tupike_hotel/pkg/repository"
+	"tupike_hotel/pkg/services"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (s *Server) SetupRoutes() http.Handler {
+func SetupRoutes(db database.DBService) http.Handler {
 	e := echo.New()
 	e.Use(middleware.Recover())
 	// e.Use(middleware.Logger())
+
 	e.Use(logger.LoggerMiddleware)
-	repo := repository.NewRepository()
+
 	// r.Use(cors.New(cors.Config{
 	// 	AllowOrigins:     []string{"*"},
 	// 	AllowMethods:     []string{"GET", "DELETE", "POST", "PATCH"},
@@ -23,17 +28,20 @@ func (s *Server) SetupRoutes() http.Handler {
 	// 	AllowCredentials: true,
 	// 	MaxAge:           12 * time.Hour,
 	// }))
+	repo := repository.NewRepository(db.GetDB())
+	services := services.NewService(repo, validator.New())
+	handler := handlers.NewCustomerHandler(repo, services)
 
-	e.GET("/", s.healthChecker)
-	api := e.Group("/api")
-	api.POST("/user")
-	return e
-}
-
-func (s *Server) healthChecker(c echo.Context) error {
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"Status":  http.StatusOK,
-		"Results": s.db.Health(),
+	e.GET("/", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, echo.Map{
+			"Status":  http.StatusOK,
+			"Results": db.Health(),
+		})
 	})
+
+	api := e.Group("/api")
+	{
+		api.POST("/signup", handler.CreateUser)
+	}
+	return e
 }

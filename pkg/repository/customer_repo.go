@@ -25,8 +25,10 @@ func NewRepository(db *bun.DB) RepoInterface {
 
 func (r Repository) InsertCustomer(ctx context.Context, user *types.Customer) error {
 	_, err := r.db.NewInsert().Model(user).Exec(ctx)
+	
 	if err != nil {
 		return errors.New(fmt.Sprintf("error inserting new user to the database: %v", err.Error()))
 	}
 	return nil
 }
+

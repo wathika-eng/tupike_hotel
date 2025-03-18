@@ -6,28 +6,35 @@ import (
 	"tupike_hotel/pkg/repository"
 	"tupike_hotel/pkg/types"
 
+	"github.com/go-playground/validator"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
-type CustomerService struct {
-	repo repository.RepoInterface
+type Service struct {
+	repo      repository.RepoInterface
+	Validator *validator.Validate
 }
 
-type CustomerServiceInterface interface {
+type ServiceInterface interface {
 	CreateNewCustomer(ctx context.Context, user *types.Customer) error
+	Validate(i any) error
+	GetValidationErrors(err error) map[string]string
 }
 
-func NewCustomerService(repo repository.RepoInterface) CustomerServiceInterface {
-	return &CustomerService{
-		repo: repo,
+func NewService(repo repository.RepoInterface, validator *validator.Validate) ServiceInterface {
+	return &Service{
+		repo:      repo,
+		Validator: validator,
 	}
 }
 
-func (s *CustomerService) CreateNewCustomer(ctx context.Context, user *types.Customer) error {
+func (s *Service) CreateNewCustomer(ctx context.Context, user *types.Customer) error {
 	hashedPass, err := hashPassword(user.Password)
 	if err != nil {
 		return err
 	}
+
 	user.Password = hashedPass
 	err = s.repo.InsertCustomer(context.Background(), user)
 	if err != nil {

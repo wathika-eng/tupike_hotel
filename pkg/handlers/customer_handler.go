@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"errors"
+	"net/http"
 	"tupike_hotel/pkg/repository"
 	resp "tupike_hotel/pkg/response"
 	"tupike_hotel/pkg/services"
@@ -12,7 +12,7 @@ import (
 
 type CustomerHandler struct {
 	repo    repository.RepoInterface
-	service services.CustomerServiceInterface
+	service services.ServiceInterface
 }
 
 type CustomerHandlerInterface interface {
@@ -20,7 +20,7 @@ type CustomerHandlerInterface interface {
 }
 
 func NewCustomerHandler(repo repository.RepoInterface,
-	service services.CustomerServiceInterface) CustomerHandlerInterface {
+	service services.ServiceInterface) CustomerHandlerInterface {
 	return &CustomerHandler{
 		repo:    repo,
 		service: service,
@@ -29,9 +29,21 @@ func NewCustomerHandler(repo repository.RepoInterface,
 
 func (h *CustomerHandler) CreateUser(c echo.Context) error {
 	var customer types.Customer
-	err := c.Bind(customer)
+	err := c.Bind(&customer)
 	if err != nil {
-		return resp.JSONResponse(c, 400, nil, errors.New(err.Error()))
+		return resp.ErrorResponse(c, http.StatusBadRequest, "invalid request body", err)
 	}
-	return resp.JSONResponse(c, 201, "okay", nil)
+	err = h.service.Validate(customer)
+	if err != nil {
+		validationErrors := h.service.GetValidationErrors(err)
+		return resp.ValidationErrorResponse(c, "failed to validate request", validationErrors)
+	}
+	return resp.SuccessResponse(c, http.StatusOK, "user created successfully", customer)
+}
+
+func (h *CustomerHandler) HealthChecker(c echo.Context) error {
+	return c.JSON(http.StatusOK, echo.Map{
+		"Status":  http.StatusOK,
+		"Results": "",
+	})
 }
