@@ -29,17 +29,24 @@ func (h *CustomerHandler) CreateUser(c echo.Context) error {
 }
 
 func (h *CustomerHandler) LoginUser(c echo.Context) error {
-	var customer types.Customer
-	err := c.Bind(&customer)
-	if err != nil {
+	type CustomerLogin struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required,min=8"`
+	}
+
+	var customer CustomerLogin
+	if err := c.Bind(&customer); err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "invalid request body", err)
 	}
-	// if strings.TrimSpace(customer.Email) == "" || strings.TrimSpace(customer.Password) == "" {
-	// 	return resp.ErrorResponse(c, http.StatusBadRequest, "invalid request body", err)
-	// }
-	err = h.service.LoginCustomer(context.Background(), customer.Email)
+
+	if err := h.service.Validate(customer); err != nil {
+		validationErrors := h.service.GetValidationErrors(err)
+		return resp.ValidationErrorResponse(c, "failed to validate request", validationErrors)
+	}
+
+	err := h.service.LoginCustomer(context.Background(), customer.Email, customer.Password)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "", err)
 	}
-	return resp.SuccessResponse(c, http.StatusOK, "user created successfully", customer.Email)
+	return resp.SuccessResponse(c, http.StatusOK, "user signed in", customer.Email)
 }

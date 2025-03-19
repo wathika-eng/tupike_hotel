@@ -3,32 +3,11 @@ package services
 import (
 	"context"
 	"errors"
-	"tupike_hotel/pkg/repository"
+	"fmt"
 	"tupike_hotel/pkg/types"
-
-	"github.com/go-playground/validator"
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-type Service struct {
-	repo      repository.RepoInterface
-	Validator *validator.Validate
-}
-
-type ServiceInterface interface {
-	CreateNewCustomer(ctx context.Context, user *types.Customer) error
-	LoginCustomer(ctx context.Context, email string) error
-	Validate(i any) error
-	GetValidationErrors(err error) map[string]string
-}
-
-func NewService(repo repository.RepoInterface, validator *validator.Validate) ServiceInterface {
-	return &Service{
-		repo:      repo,
-		Validator: validator,
-	}
-}
 
 func (s *Service) CreateNewCustomer(ctx context.Context, user *types.Customer) error {
 	hashedPass, err := hashPassword(user.Password)
@@ -44,17 +23,29 @@ func (s *Service) CreateNewCustomer(ctx context.Context, user *types.Customer) e
 	return nil
 }
 
-func (s *Service) LoginCustomer(ctx context.Context, email string) error {
-	err := s.repo.LookUpCustomer(context.Background(), email)
-	if err != nil {
-		return errors.New("user not found on the database")
+func (s *Service) LoginCustomer(ctx context.Context, email, password string) error {
+	userFound, err := s.repo.LookUpCustomer(context.Background(), email)
+	if err != nil || userFound == nil {
+		return fmt.Errorf("user not found on the database: %v", err)
 	}
+	err = checkPass(userFound.Password, password)
+	if err != nil {
+		return errors.New("wrong password")
+	}
+	// proceed to assigning a token
 	return nil
 }
+
+// hashes the password before saving to the database
 func hashPassword(password string) (string, error) {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", errors.New("could not hash the password")
 	}
 	return string(hashedPass), nil
+}
+
+// check if the supplied password matches the hashed password on the db
+func checkPass(hashedPass, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(password))
 }
