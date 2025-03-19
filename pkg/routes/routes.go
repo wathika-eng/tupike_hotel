@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"tupike_hotel/pkg/database"
 	"tupike_hotel/pkg/handlers"
-	logger "tupike_hotel/pkg/middleware"
+	custom "tupike_hotel/pkg/middleware"
 	"tupike_hotel/pkg/repository"
 	"tupike_hotel/pkg/services"
 
@@ -17,8 +17,8 @@ func SetupRoutes(db database.DBService) http.Handler {
 	e := echo.New()
 	e.Use(middleware.Recover())
 	// e.Use(middleware.Logger())
-
-	e.Use(logger.LoggerMiddleware)
+	//e.Use(echojwt.JWT([]byte(config.Envs.SecretKey)))
+	e.Use(custom.LoggerMiddleware)
 
 	// r.Use(cors.New(cors.Config{
 	// 	AllowOrigins:     []string{"*"},

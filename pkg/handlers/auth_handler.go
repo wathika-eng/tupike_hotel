@@ -44,9 +44,9 @@ func (h *CustomerHandler) LoginUser(c echo.Context) error {
 		return resp.ValidationErrorResponse(c, "failed to validate request", validationErrors)
 	}
 
-	err := h.service.LoginCustomer(context.Background(), customer.Email, customer.Password)
+	token, err := h.service.LoginCustomer(context.Background(), customer.Email, customer.Password)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "", err)
 	}
-	return resp.SuccessResponse(c, http.StatusOK, "user signed in", customer.Email)
+	return resp.SuccessResponse(c, http.StatusOK, "user signed in", token)
 }
