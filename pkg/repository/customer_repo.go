@@ -3,10 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 	"tupike_hotel/pkg/types"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -39,26 +37,30 @@ func (r Repository) LookUpCustomer(ctx context.Context, email string) (*types.Cu
 	return &user, nil
 }
 
-func (r Repository) InsertUnverified(ctx context.Context, user *types.Customer, otp string) error {
-	key := fmt.Sprintf("unverified_user:%s", user.Email)
-	exists, err := r.redis.Exists(ctx, key).Result()
+func (r Repository) CheckOTP(ctx context.Context, email, otp string) error {
+	// check if user is in the database
+	customer, err := r.LookUpCustomer(ctx, email)
+	// if not in database, return
 	if err != nil {
-		return fmt.Errorf("failed to check email existence: %v", err)
+		return err
 	}
-	if exists > 0 {
-		return fmt.Errorf("email %s already exists", user.Email)
+	// is user is in the database but verified = true, return
+	if customer.Verified {
+		return errors.New("user is already verified")
 	}
-
-	data, err := json.Marshal(user)
+	// if user request body OTP is not same as OTP in the database, return
+	if customer.OTP != otp {
+		return errors.New("wrong otp code")
+	}
+	// change user to verified = true and set OTP = 0 (or drop the column) in the database
+	customer.Verified = true
+	_, err = r.db.NewUpdate().Model(customer).Column("verified").Where("email = ?", email).Exec(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to marshal user data: %v", err)
+		return err
 	}
-
-	if err := r.redis.Set(ctx, key, data, 24*time.Hour).Err(); err != nil {
-		return fmt.Errorf("failed to store unverified user: %v", err)
-	}
-
-	return nil
+	customer.OTP = "0"
+	_, err = r.db.NewUpdate().Model(customer).Column("otp").Where("email = ?", email).Exec(ctx)
+	return err
 }
 
 // cleanup deletes users who are unverified if 7days are over

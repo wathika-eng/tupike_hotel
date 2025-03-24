@@ -45,7 +45,10 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	api := e.Group("/api")
 	{
 		api.POST("/signup", handler.CreateUser)
+		api.POST("/verify-otp", handler.VerifyOTP)
+		//api.POST("/generate-otp")
 		api.POST("/login", handler.LoginUser)
+
 	}
 
 	r := e.Group("/admin")

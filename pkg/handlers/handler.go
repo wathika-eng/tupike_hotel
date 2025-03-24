@@ -14,10 +14,11 @@ type CustomerHandler struct {
 }
 
 type CustomerHandlerInterface interface {
-	CreateUser(e echo.Context) error
-	LoginUser(e echo.Context) error
+	CreateUser(c echo.Context) error
+	VerifyOTP(c echo.Context) error
+	LoginUser(c echo.Context) error
 	AddFood(c echo.Context) error
-	OrderFood(e echo.Context) error
+	OrderFood(c echo.Context) error
 	Profile(c echo.Context) error
 }
 

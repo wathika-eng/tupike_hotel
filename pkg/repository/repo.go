@@ -15,8 +15,8 @@ type Repository struct {
 }
 
 type RepoInterface interface {
-	InsertUnverified(ctx context.Context, user *types.Customer, otp string) error
 	InsertCustomer(ctx context.Context, user *types.Customer) error
+	CheckOTP(ctx context.Context, email, otp string) error
 	LookUpCustomer(ctx context.Context, email string) (*types.Customer, error)
 	InsertFood(ctx context.Context, food *types.FoodItem) error
 	InsertOrder(ctx context.Context, order *types.Order) error

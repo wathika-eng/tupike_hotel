@@ -13,6 +13,7 @@ type Customer struct {
 	//UserName      string    `json:"username" validate:"required" bun:"user_name,notnull"`
 	Email       string    `json:"email" validate:"required,email" bun:"email,unique,notnull"`
 	PhoneNumber string    `json:"phone_number" validate:"required,e164" bun:"phone_number,unique,notnull"`
+	OTP         string    `json:"otp" bun:"otp"`
 	IsAdmin     bool      `json:"is_admin" bun:"is_admin,notnull,default:false"`
 	Password    string    `json:"password" validate:"required,min=8" bun:"password,notnull"`
 	Verified    bool      `json:"verified" bun:"verified,default:false"`
