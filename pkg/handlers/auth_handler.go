@@ -25,14 +25,14 @@ func (h *CustomerHandler) CreateUser(c echo.Context) error {
 
 	otp := h.service.GenerateOTP()
 	customer.OTP = otp
+	//send OTP to both email and phone number
+	if _, err := h.service.SendOTP(c.Request().Context(), customer.PhoneNumber, customer.Email, otp); err != nil {
+		return resp.ErrorResponse(c, http.StatusInternalServerError, "failed to send OTP", err)
+	}
+
 	err = h.service.CreateNewCustomer(context.Background(), customer)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "error while inserting user", err)
-	}
-
-	//send OTP to both email and phone number
-	if _, err := h.service.SendOTP(customer.PhoneNumber, customer.Email, otp); err != nil {
-		return resp.ErrorResponse(c, http.StatusInternalServerError, "failed to send SMS OTP", err)
 	}
 
 	customer.Password = ""

@@ -19,7 +19,7 @@ type ServiceInterface interface {
 	CreateNewCustomer(ctx context.Context, user *types.Customer) error
 	LoginCustomer(ctx context.Context, email, password string) (string, error)
 	GenerateOTP() string
-	SendOTP(phoneNumber, email, Otp string) (any, error)
+	SendOTP(ctx context.Context, phoneNumber, email, Otp string) (any, error)
 	CheckOTP(ctx context.Context, email, otp string) error
 }
 

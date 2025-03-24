@@ -8,6 +8,7 @@ import (
 	"strings"
 	"tupike_hotel/pkg/config"
 
+	"github.com/resend/resend-go/v2"
 	"github.com/tech-kenya/africastalking-sms-lib"
 )
 
@@ -16,7 +17,8 @@ func (s *Service) GenerateOTP() string {
 	return strconv.Itoa(rand.Intn(9000) + 1000)
 }
 
-func (s *Service) SendOTP(phoneNumber, email, Otp string) (any, error) {
+func (s *Service) SendOTP(ctx context.Context, phoneNumber, email, Otp string) (any, error) {
+	// sms logic
 	client, err := africastalking.NewSMSClient(config.Envs.AtApiKey, config.Envs.AtUserName,
 		config.Envs.AtShortCode, config.Envs.AtEnvironment)
 
@@ -27,7 +29,24 @@ func (s *Service) SendOTP(phoneNumber, email, Otp string) (any, error) {
 	// if err != nil {
 	// 	return "", err
 	// }
-	// implement email later
+
+	// email logic
+	_ = resend.NewClient(config.Envs.RESEND_API_KEY)
+	// params := &resend.SendEmailRequest{
+	// 	From:    "Tupike Hotel <onboarding@resend.dev>",
+	// 	To:      []string{email},
+	// 	Html:    fmt.Sprintf("<strong>OTP Code:%v</strong>", Otp),
+	// 	Subject: "Verification Code",
+	// 	// Cc:      []string{"cc@example.com"},
+	// 	// Bcc:     []string{"bcc@example.com"},
+	// 	ReplyTo: "replyto@example.com",
+	// }
+
+	// sent, err := emailClient.Emails.SendWithContext(ctx, params)
+	// if err != nil {
+	// 	return "", err
+	// }
+
 	return "", nil
 }
 

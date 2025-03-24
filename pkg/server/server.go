@@ -50,7 +50,7 @@ func NewServer() *http.Server {
 	}
 
 	// Run Migrations
-	if err := migration.Drop(db.GetDB()); err != nil {
+	if err := migration.Migrate(db.GetDB()); err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}
 

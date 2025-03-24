@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	resp "tupike_hotel/pkg/response"
 
@@ -20,8 +19,17 @@ func (h *CustomerHandler) Profile(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusForbidden, "Unauthorized access")
 	}
-
-	log.Println("Claims in handler:", claims)
-
-	return resp.SuccessResponse(c, 200, "testing", nil)
+	email, ok := claims["sub"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Email not found in token")
+	}
+	user, err := h.repo.LookUpCustomer(c.Request().Context(), email)
+	if err != nil {
+		return resp.ErrorResponse(c, http.StatusInternalServerError,
+			"user not found", err)
+	}
+	user.Password = ""
+	return c.JSON(http.StatusOK, echo.Map{
+		"user": user,
+	})
 }

@@ -21,6 +21,7 @@ type RepoInterface interface {
 	InsertFood(ctx context.Context, food *types.FoodItem) error
 	InsertOrder(ctx context.Context, order *types.Order) error
 	Cleanup(ctx context.Context, user *types.Customer) error
+	UpdateLoginTime(ctx context.Context, email string) error
 }
 
 func NewRepository(db *bun.DB, redis *redis.Client) RepoInterface {

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"net/http"
-	"tupike_hotel/pkg/config"
 	"tupike_hotel/pkg/database"
 	"tupike_hotel/pkg/handlers"
 	custom "tupike_hotel/pkg/middleware"
@@ -10,7 +9,6 @@ import (
 	"tupike_hotel/pkg/services"
 
 	"github.com/go-playground/validator"
-	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/redis/go-redis/v9"
@@ -52,10 +50,7 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	}
 
 	r := e.Group("/admin")
-	r.Use(echojwt.WithConfig(echojwt.Config{
-		SigningKey: []byte(config.Envs.SecretKey),
-	}))
-	// r.Use(custom.AuthMiddleware)
+	r.Use(custom.AuthMiddleware())
 	{
 		r.GET("/profile", handler.Profile)
 	}

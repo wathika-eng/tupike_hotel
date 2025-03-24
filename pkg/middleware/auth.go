@@ -3,30 +3,40 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"strings"
+	"tupike_hotel/pkg/services"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
-// todo
-func AuthMiddleware() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// Retrieve token from context
-		token, ok := c.Get("user").(*jwt.Token)
-		if !ok || token == nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, "JWT token missing or invalid")
-		}
+func AuthMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader == "" {
+				log.Println("Missing Authorization header")
+				return echo.NewHTTPError(http.StatusUnauthorized, "Missing Authorization header")
+			}
 
-		// Extract claims
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Failed to parse JWT claims")
-		}
+			// Expect "Bearer <token>"
+			parts := strings.Split(authHeader, " ")
+			if len(parts) != 2 || parts[0] != "Bearer" {
+				log.Println("Invalid Authorization header format")
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid Authorization header format")
+			}
 
-		// Store claims in context for further use
-		c.Set("claims", claims)
-		log.Printf("%v\n", claims)
-		// Allow the request to proceed
-		return nil
+			tokenString := parts[1]
+			claims, err := services.VerifyToken(tokenString)
+			if err != nil {
+				log.Println("JWT verification failed:", err)
+				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
+			}
+
+			// Store claims in context
+			c.Set("claims", claims)
+			log.Println("Token verified, claims:", claims)
+
+			return next(c)
+		}
 	}
 }

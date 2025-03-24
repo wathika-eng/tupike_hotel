@@ -19,7 +19,7 @@ type config struct {
 	ConnectionString string
 	SecretKey        string
 	RefreshKey       string
-	// RESEND_API_KEY    string
+	RESEND_API_KEY   string
 	// UPTRACE_DSN       string
 	GinMode            string
 	RedisUrl           string
@@ -49,7 +49,7 @@ func initConfigs() config {
 		ConnectionString: getEnv("CONNECTION_STRING", ""),
 		SecretKey:        getEnv("SECRET_KEY", "https://acte.ltd/utils/randomkeygen"),
 		RefreshKey:       getEnv("REFRESH_KEY", "https://randomkeygen.com/"),
-		// RESEND_API_KEY:    getEnv("RESEND_API_KEY", ""),
+		RESEND_API_KEY:   getEnv("RESEND_API_KEY", ""),
 		// UPTRACE_DSN:       getEnv("UPTRACE_DSN", ""),
 		GinMode:            getEnv("GIN_MODE", "release"),
 		RedisUrl:           getEnv("REDIS_URL", "localhost:6379"),

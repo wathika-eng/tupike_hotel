@@ -33,6 +33,7 @@ func (s *Service) LoginCustomer(ctx context.Context, email, password string) (st
 	if err != nil || userFound == nil {
 		return "", fmt.Errorf("user not found on the database: %v", err)
 	}
+
 	err = checkPass(userFound.Password, password)
 	if err != nil {
 		return "", errors.New("wrong password")
@@ -41,11 +42,11 @@ func (s *Service) LoginCustomer(ctx context.Context, email, password string) (st
 	// 	return "", errors.New("user not verified")
 	// }
 	// proceed to assigning a token
-	accessToken, err := createToken(userFound)
+	accessToken, err := CreateToken(userFound)
 	if err != nil {
 		return "", fmt.Errorf("error while generating access token: %v", err)
 	}
-
+	s.repo.UpdateLoginTime(ctx, email)
 	return accessToken, nil
 }
 
@@ -63,19 +64,42 @@ func checkPass(hashedPass, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(password))
 }
 
-func createToken(user *types.Customer) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"role": user.IsAdmin,
-		"sub":  user.Email,
-		"iss":  "todoApp",
-		"exp":  time.Now().Add(time.Hour).Unix(),
-		"iat":  time.Now().Unix(),
-	})
-	log.Println(token)
-	return token.SignedString([]byte(config.Envs.SecretKey))
+func CreateToken(user *types.Customer) (string, error) {
+	claims := jwt.MapClaims{
+		"admin": user.IsAdmin,
+		"sub":   user.Email,
+		"iss":   "todoApp",
+		"exp":   time.Now().Add(7 * time.Hour).Unix(),
+		"iat":   time.Now().Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(config.Envs.SecretKey))
+	if err != nil {
+		log.Println("JWT signing error:", err)
+		return "", err
+	}
+
+	return signedToken, nil
 }
 
-// todo
-func validateToken() (bool, error) {
-	return false, nil
+func VerifyToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.Envs.SecretKey), nil
+	})
+
+	if err != nil {
+		log.Println("Token verification failed:", err)
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
 }

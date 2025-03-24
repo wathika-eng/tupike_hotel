@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 	"tupike_hotel/pkg/types"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -60,6 +61,13 @@ func (r Repository) CheckOTP(ctx context.Context, email, otp string) error {
 	}
 	customer.OTP = "0"
 	_, err = r.db.NewUpdate().Model(customer).Column("otp").Where("email = ?", email).Exec(ctx)
+	return err
+}
+
+func (r Repository) UpdateLoginTime(ctx context.Context, email string) error {
+	customer, _ := r.LookUpCustomer(ctx, email)
+	customer.LastLogin = time.Now()
+	_, err := r.db.NewUpdate().Model(customer).Column("last_login").Where("email = ?", email).Exec(ctx)
 	return err
 }
 
