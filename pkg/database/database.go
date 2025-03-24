@@ -54,9 +54,7 @@ func initDB() (*service, error) {
 		sqldb.Close()
 		return nil, fmt.Errorf("error connecting to the database: %v", err.Error())
 	}
-	// if err := health(sqldb); err != nil {
-	// 	log.Fatal(err)
-	// }
+
 	db := bun.NewDB(sqldb, pgdialect.New())
 	log.Println("✅ Database connected successfully")
 	return &service{
@@ -76,4 +74,3 @@ func (s *service) Close() error {
 	log.Printf("Disconnected from database: %s", s.db)
 	return s.db.Close()
 }
-

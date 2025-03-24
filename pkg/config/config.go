@@ -26,6 +26,10 @@ type config struct {
 	DbMaxIdleConns     string
 	DbMaxOpenConns     string
 	DbMaxLifetimeConns string
+	AtApiKey           string
+	AtUserName         string
+	AtShortCode        string
+	AtEnvironment      string
 }
 
 var Envs = initConfigs()
@@ -52,6 +56,10 @@ func initConfigs() config {
 		DbMaxIdleConns:     getEnv("DB_MAX_IDLE_CONNS", "10"),
 		DbMaxOpenConns:     getEnv("DB_MAX_OPEN_CONNS", "10"),
 		DbMaxLifetimeConns: getEnv("DB_MAX_LIFETIME_CONNS", "10"),
+		AtApiKey:           getEnv("AtApiKey", ""),
+		AtUserName:         getEnv("AtUserName", "sandbox"),
+		AtShortCode:        getEnv("AtShortCode", ""),
+		AtEnvironment:      getEnv("AtEnvironment", "sandbox"),
 	}
 }
 

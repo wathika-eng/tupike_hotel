@@ -16,6 +16,9 @@ type CustomerHandler struct {
 type CustomerHandlerInterface interface {
 	CreateUser(e echo.Context) error
 	LoginUser(e echo.Context) error
+	AddFood(c echo.Context) error
+	OrderFood(e echo.Context) error
+	Profile(c echo.Context) error
 }
 
 func NewCustomerHandler(repo repository.RepoInterface,

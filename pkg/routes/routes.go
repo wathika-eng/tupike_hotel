@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"tupike_hotel/pkg/config"
 	"tupike_hotel/pkg/database"
 	"tupike_hotel/pkg/handlers"
 	custom "tupike_hotel/pkg/middleware"
@@ -9,11 +10,13 @@ import (
 	"tupike_hotel/pkg/services"
 
 	"github.com/go-playground/validator"
+	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/redis/go-redis/v9"
 )
 
-func SetupRoutes(db database.DBService) http.Handler {
+func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	e := echo.New()
 	e.Use(middleware.Recover())
 	// e.Use(middleware.Logger())
@@ -28,14 +31,14 @@ func SetupRoutes(db database.DBService) http.Handler {
 	// 	AllowCredentials: true,
 	// 	MaxAge:           12 * time.Hour,
 	// }))
-	repo := repository.NewRepository(db.GetDB())
+	repo := repository.NewRepository(db.GetDB(), client)
 	services := services.NewService(repo, validator.New())
 	handler := handlers.NewCustomerHandler(repo, services)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, echo.Map{
-			"Status":  http.StatusOK,
-			"Results": db.Health(),
+			"status":  http.StatusOK,
+			"results": db.Health(),
 		})
 	})
 
@@ -44,5 +47,15 @@ func SetupRoutes(db database.DBService) http.Handler {
 		api.POST("/signup", handler.CreateUser)
 		api.POST("/login", handler.LoginUser)
 	}
+
+	r := e.Group("/admin")
+	r.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(config.Envs.SecretKey),
+	}))
+	// r.Use(custom.AuthMiddleware)
+	{
+		r.GET("/profile", handler.Profile)
+	}
+
 	return e
 }

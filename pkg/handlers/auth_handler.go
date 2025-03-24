@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 	resp "tupike_hotel/pkg/response"
 	"tupike_hotel/pkg/types"
 
@@ -10,22 +11,41 @@ import (
 )
 
 func (h *CustomerHandler) CreateUser(c echo.Context) error {
-	var customer types.Customer
-	err := c.Bind(&customer)
+	var request struct {
+		customer          *types.Customer
+		OTPDeliveryMethod string `json:"otp_delivery_method" validate:"required,oneof=sms email"`
+	}
+
+	err := c.Bind(&request)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "invalid request body", err)
 	}
-	err = h.service.Validate(customer)
+	err = h.service.Validate(request.customer)
 	if err != nil {
 		validationErrors := h.service.GetValidationErrors(err)
 		return resp.ValidationErrorResponse(c, "failed to validate request", validationErrors)
 	}
-	err = h.service.CreateNewCustomer(context.Background(), &customer)
+
+	otp := h.service.GenerateOTP()
+
+	err = h.service.CreateNewCustomer(context.Background(), request.customer, otp)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "error while inserting user", err)
 	}
-	customer.Password = ""
-	return resp.SuccessResponse(c, http.StatusOK, "user created successfully", customer.Email)
+	switch strings.ToLower(request.OTPDeliveryMethod) {
+	case "sms":
+		if _, err := h.service.SendSMS(request.customer.PhoneNumber, otp); err != nil {
+			return resp.ErrorResponse(c, http.StatusInternalServerError, "failed to send SMS OTP", err)
+		}
+	case "email":
+		if err := h.service.SendEmail(request.customer.Email, otp); err != nil {
+			return resp.ErrorResponse(c, http.StatusInternalServerError, "failed to send email OTP", err)
+		}
+	}
+
+	request.customer.Password = ""
+	return resp.SuccessResponse(c, http.StatusOK, "Check your "+request.OTPDeliveryMethod+" for verification code",
+		request.customer.Email)
 }
 
 func (h *CustomerHandler) LoginUser(c echo.Context) error {
@@ -43,10 +63,16 @@ func (h *CustomerHandler) LoginUser(c echo.Context) error {
 		validationErrors := h.service.GetValidationErrors(err)
 		return resp.ValidationErrorResponse(c, "failed to validate request", validationErrors)
 	}
-
+	
 	token, err := h.service.LoginCustomer(context.Background(), customer.Email, customer.Password)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusBadRequest, "", err)
 	}
-	return resp.SuccessResponse(c, http.StatusOK, "user signed in", token)
+	return c.JSON(http.StatusOK, echo.Map{
+		"access_token": token,
+	})
+}
+
+func (h *CustomerHandler) VerifyOTP(c echo.Context) error {
+
 }

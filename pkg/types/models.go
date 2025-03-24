@@ -10,14 +10,15 @@ import (
 type Customer struct {
 	bun.BaseModel `bun:"table:customers"`
 	ID            uuid.UUID `json:"id" bun:",pk,type:uuid,default:gen_random_uuid()"`
-	UserName      string    `json:"username" validate:"required" bun:"user_name,notnull"`
-	Email         string    `json:"email" validate:"required,email" bun:"email,unique,notnull"`
-	PhoneNumber   string    `json:"phone_number" validate:"required,e164" bun:"phone_number,unique,notnull"`
-	Password      string    `json:"password" validate:"required,min=8" bun:"password,notnull"`
-	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
-	LastLogin     time.Time `json:"last_login" bun:"last_login,notnull,default:current_timestamp"`
-	IsAdmin       bool      `json:"is_admin" bun:"is_admin,notnull,default:false"`
-	Orders        []Order   `json:"orders" bun:"rel:has-many,join:id=customer_id"`
+	//UserName      string    `json:"username" validate:"required" bun:"user_name,notnull"`
+	Email       string    `json:"email" validate:"required,email" bun:"email,unique,notnull"`
+	PhoneNumber string    `json:"phone_number" validate:"required,e164" bun:"phone_number,unique,notnull"`
+	IsAdmin     bool      `json:"is_admin" bun:"is_admin,notnull,default:false"`
+	Password    string    `json:"password" validate:"required,min=8" bun:"password,notnull"`
+	Verified    bool      `json:"verified" bun:"verified,default:false"`
+	CreatedAt   time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
+	LastLogin   time.Time `json:"last_login" bun:"last_login,notnull,default:current_timestamp"`
+	Orders      []Order   `json:"orders" bun:"rel:has-many,join:id=customer_id"`
 }
 
 type FoodItem struct {

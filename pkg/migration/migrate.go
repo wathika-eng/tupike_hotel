@@ -1,7 +1,8 @@
-package migrations
+package migration
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 	"tupike_hotel/pkg/types"
@@ -9,19 +10,19 @@ import (
 	"github.com/uptrace/bun"
 )
 
-func Migrate(db *bun.DB) {
+func Migrate(db *bun.DB) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*60))
 	defer cancel()
 	_, err := db.ExecContext(ctx, `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`)
 	if err != nil {
-		log.Fatalf("❌ Failed to enable uuid-ossp extension: %v", err)
+		return fmt.Errorf("❌ Failed to enable uuid-ossp extension: %v", err)
 	}
 
 	// Customers table
 	_, err = db.NewCreateTable().IfNotExists().
 		Model((*types.Customer)(nil)).Exec(ctx)
 	if err != nil {
-		log.Fatalf("❌ Failed to create customers table: %v", err)
+		return fmt.Errorf("❌ Failed to create customers table: %v", err)
 	}
 	log.Println("✅ Customers table created successfully!")
 
@@ -31,7 +32,7 @@ func Migrate(db *bun.DB) {
 		ForeignKey(`("customer_id") REFERENCES "customers" ("id") ON DELETE CASCADE`).
 		Exec(ctx)
 	if err != nil {
-		log.Fatalf("❌ Failed to create food_items table: %v", err)
+		return fmt.Errorf("❌ Failed to create food_items table: %v", err)
 	}
 	log.Println("✅ FoodItems table created successfully!")
 
@@ -41,17 +42,19 @@ func Migrate(db *bun.DB) {
 		ForeignKey(`("customer_id") REFERENCES "customers" ("id") ON DELETE CASCADE`).
 		Exec(ctx)
 	if err != nil {
-		log.Fatalf("❌ Failed to create orders table: %v", err)
+		return fmt.Errorf("❌ Failed to create orders table: %v", err)
 	}
 	log.Println("✅ Orders table created successfully!")
+	return nil
 }
 
-func Drop(db *bun.DB) {
+func Drop(db *bun.DB) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*60))
 	defer cancel()
 	err := db.ResetModel(ctx, (*types.Customer)(nil), (*types.FoodItem)(nil), (*types.Order)(nil))
 	if err != nil {
-		log.Fatalf("❌ Failed to drop tables: %v", err)
+		return fmt.Errorf("❌ Failed to drop tables: %v", err)
 	}
 	log.Println("✅ Tables dropped successfully!")
+	return nil
 }
