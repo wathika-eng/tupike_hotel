@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"tupike_hotel/pkg/types"
 
@@ -17,6 +19,8 @@ func NewFoodRepo(db *DatabaseManager) *FoodRepo {
 		db: db,
 	}
 }
+
+// inserts food
 func (r *FoodRepo) InsertFood(ctx context.Context, food *types.FoodItem) error {
 	_, err := r.db.DB.NewInsert().Model(food).Exec(ctx)
 	if err != nil {
@@ -29,6 +33,7 @@ func (r *FoodRepo) InsertFood(ctx context.Context, food *types.FoodItem) error {
 	return nil
 }
 
+// fetches food
 func (r *FoodRepo) GetFood(ctx context.Context) ([]types.FoodItem, error) {
 	var foods []types.FoodItem
 	err := r.db.DB.NewSelect().Model(&foods).Scan(ctx)
@@ -36,4 +41,17 @@ func (r *FoodRepo) GetFood(ctx context.Context) ([]types.FoodItem, error) {
 		return nil, fmt.Errorf("error fetching food items: %w", err)
 	}
 	return foods, nil
+}
+
+func (r *FoodRepo) LookupFood(ctx context.Context, foodName *types.FoodItem) (*types.FoodItem, error) {
+	var food types.FoodItem
+	err := r.db.DB.NewSelect().Model(&food).Where("item = ?", foodName).Limit(1).Scan(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("food not found")
+		}
+		return nil, err
+	}
+
+	return &food, nil
 }

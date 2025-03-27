@@ -40,18 +40,23 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 
 	api := e.Group("/api")
 	{
-		api.POST("/signup", handler.CreateUser)
-		api.POST("/verify-otp", handler.VerifyOTP)
-		//api.POST("/generate-otp")
-		api.POST("/login", handler.LoginUser)
 		api.GET("/food", handler.GetFood)
-
 	}
 
-	r := e.Group("/admin")
+	apiAuth := e.Group("/api/auth")
+	{
+		apiAuth.POST("/signup", handler.CreateUser)
+		apiAuth.POST("/verify-otp", handler.VerifyOTP)
+		//api.POST("/generate-otp")
+		apiAuth.POST("/login", handler.LoginUser)
+	}
+
+	r := e.Group("/api/protected")
 	r.Use(custom.AuthMiddleware())
 	{
 		r.GET("/profile", handler.Profile)
+		r.POST("/add-food", handler.AddFood)
+		r.POST("/place-order", handler.OrderFood)
 	}
 
 	return e

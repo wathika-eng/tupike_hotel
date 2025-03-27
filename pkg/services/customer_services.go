@@ -67,7 +67,7 @@ func checkPass(hashedPass, password string) error {
 func CreateToken(user *types.Customer) (string, error) {
 	claims := jwt.MapClaims{
 		"admin": user.IsAdmin,
-		"sub":   user.Email,
+		"sub":   user.ID,
 		"iss":   "todoApp",
 		"exp":   time.Now().Add(7 * time.Hour).Unix(),
 		"iat":   time.Now().Unix(),

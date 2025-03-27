@@ -9,7 +9,7 @@ import (
 	"tupike_hotel/pkg/config"
 
 	"github.com/resend/resend-go/v2"
-	"github.com/tech-kenya/africastalking-sms-lib"
+	africastalking "github.com/tech-kenya/africastalkingsms"
 )
 
 // will add expiration later

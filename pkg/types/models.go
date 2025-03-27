@@ -29,6 +29,7 @@ type FoodItem struct {
 	Description   string    `json:"description" validate:"required" bun:"description,notnull"`
 	ImageURL      string    `json:"image_url" validate:"required,url" bun:"image_url,notnull,unique"`
 	OrderFreq     int       `json:"order_freq" bun:"order_freq,notnull,default:0"`
+	Quantity      int       `json:"quantity" validate:"required" bun:"quantity,notnull,default:0"`
 	Price         float64   `json:"price" validate:"required,gt=0" bun:"price,notnull"`
 	CreatedAt     time.Time `json:"created_at" bun:"created_at,notnull,default:current_timestamp"`
 	Orders        []Order   `bun:"rel:has-many,join:id=food_id"`

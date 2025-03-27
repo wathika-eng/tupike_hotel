@@ -18,10 +18,6 @@ func NewOrdersRepo(db *DatabaseManager) *OrdersRepo {
 	}
 }
 
-// type OrderRepo interface {
-// 	InsertOrder(ctx context.Context, order *types.Order) error
-// }
-
 func (r *OrdersRepo) InsertOrder(ctx context.Context, order *types.Order) error {
 	_, err := r.db.DB.NewInsert().Model(order).Exec(ctx)
 	if err != nil {

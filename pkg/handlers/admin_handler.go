@@ -8,12 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// can perform crud operations on food items
-// only admins
-func (h *Handler) AddFood(c echo.Context) error {
-	return nil
-}
-
 func (h *Handler) Profile(c echo.Context) error {
 	claims, ok := c.Get("claims").(jwt.MapClaims)
 	if !ok {
