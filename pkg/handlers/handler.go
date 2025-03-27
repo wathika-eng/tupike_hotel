@@ -8,29 +8,39 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type CustomerHandler struct {
-	repo    repository.RepoInterface
-	service services.ServiceInterface
+type Handler struct {
+	repo    *repository.Repository
+	service *services.Service
 }
 
-type CustomerHandlerInterface interface {
-	CreateUser(c echo.Context) error
-	VerifyOTP(c echo.Context) error
-	LoginUser(c echo.Context) error
-	AddFood(c echo.Context) error
-	OrderFood(c echo.Context) error
-	Profile(c echo.Context) error
-}
-
-func NewCustomerHandler(repo repository.RepoInterface,
-	service services.ServiceInterface) CustomerHandlerInterface {
-	return &CustomerHandler{
+func NewHandler(repo *repository.Repository,
+	service *services.Service) *Handler {
+	return &Handler{
 		repo:    repo,
 		service: service,
 	}
 }
 
-func (h *CustomerHandler) HealthChecker(c echo.Context) error {
+// type AuthHandler interface {
+// 	CreateUser(c echo.Context) error
+// 	VerifyOTP(c echo.Context) error
+// 	LoginUser(c echo.Context) error
+// }
+
+// type UserHandler interface {
+// 	Profile(c echo.Context) error
+// }
+
+// type FoodHandler interface {
+// 	AddFood(c echo.Context) error
+// 	GetFood(c echo.Context) error
+// }
+
+// type OrderHandler interface {
+// 	OrderFood(c echo.Context) error
+// }
+
+func (h *Handler) HealthChecker(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"Status":  http.StatusOK,
 		"Results": "",

@@ -10,11 +10,11 @@ import (
 
 // can perform crud operations on food items
 // only admins
-func (h *CustomerHandler) AddFood(c echo.Context) error {
+func (h *Handler) AddFood(c echo.Context) error {
 	return nil
 }
 
-func (h *CustomerHandler) Profile(c echo.Context) error {
+func (h *Handler) Profile(c echo.Context) error {
 	claims, ok := c.Get("claims").(jwt.MapClaims)
 	if !ok {
 		return echo.NewHTTPError(http.StatusForbidden, "Unauthorized access")
@@ -23,7 +23,7 @@ func (h *CustomerHandler) Profile(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Email not found in token")
 	}
-	user, err := h.repo.LookUpCustomer(c.Request().Context(), email)
+	user, err := h.repo.CustomerRepo.LookUpCustomer(c.Request().Context(), email)
 	if err != nil {
 		return resp.ErrorResponse(c, http.StatusInternalServerError,
 			"user not found", err)

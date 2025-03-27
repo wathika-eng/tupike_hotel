@@ -8,8 +8,22 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func (r Repository) InsertOrder(ctx context.Context, order *types.Order) error {
-	_, err := r.db.NewInsert().Model(order).Exec(ctx)
+type OrdersRepo struct {
+	db *DatabaseManager
+}
+
+func NewOrdersRepo(db *DatabaseManager) *OrdersRepo {
+	return &OrdersRepo{
+		db: db,
+	}
+}
+
+// type OrderRepo interface {
+// 	InsertOrder(ctx context.Context, order *types.Order) error
+// }
+
+func (r *OrdersRepo) InsertOrder(ctx context.Context, order *types.Order) error {
+	_, err := r.db.DB.NewInsert().Model(order).Exec(ctx)
 	if err != nil {
 		// Check for unique constraint violation (DB-specific handling)
 		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" { // 23505 = unique_violation

@@ -54,5 +54,5 @@ func (s *Service) CheckOTP(ctx context.Context, email, otp string) error {
 	if strings.TrimSpace(email) == "" || strings.TrimSpace(otp) == "" {
 		return errors.New("email or OTP cannot be blank")
 	}
-	return s.repo.CheckOTP(ctx, email, otp)
+	return s.customerRepo.CheckOTP(ctx, email, otp)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Service) Validate(i any) error {
-	if err := s.Validator.Struct(i); err != nil {
+	if err := s.validator.Struct(i); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return nil

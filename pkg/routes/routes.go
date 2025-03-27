@@ -19,8 +19,6 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	e.Use(middleware.Recover())
 	// e.Use(middleware.Logger())
 	//e.Use(echojwt.JWT([]byte(config.Envs.SecretKey)))
-	e.Use(custom.LoggerMiddleware)
-
 	// r.Use(cors.New(cors.Config{
 	// 	AllowOrigins:     []string{"*"},
 	// 	AllowMethods:     []string{"GET", "DELETE", "POST", "PATCH"},
@@ -29,9 +27,9 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	// 	AllowCredentials: true,
 	// 	MaxAge:           12 * time.Hour,
 	// }))
-	repo := repository.NewRepository(db.GetDB(), client)
-	services := services.NewService(repo, validator.New())
-	handler := handlers.NewCustomerHandler(repo, services)
+	repo := repository.NewRepository(repository.NewDatabaseManager(db.GetDB(), client))
+	services := services.NewService(repo.CustomerRepo, repo.FoodRepo, repo.OrderRepo, validator.New())
+	handler := handlers.NewHandler(repo, services)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, echo.Map{
@@ -46,6 +44,7 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 		api.POST("/verify-otp", handler.VerifyOTP)
 		//api.POST("/generate-otp")
 		api.POST("/login", handler.LoginUser)
+		api.GET("/food", handler.GetFood)
 
 	}
 

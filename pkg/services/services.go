@@ -1,31 +1,37 @@
 package services
 
 import (
-	"context"
 	"tupike_hotel/pkg/repository"
-	"tupike_hotel/pkg/types"
 
 	"github.com/go-playground/validator"
 )
 
 type Service struct {
-	repo      repository.RepoInterface
-	Validator *validator.Validate
+	customerRepo *repository.CustomerRepo
+	foodRepo     *repository.FoodRepo
+	orderRepo    *repository.OrdersRepo
+	validator    *validator.Validate
 }
 
-type ServiceInterface interface {
-	Validate(i any) error
-	GetValidationErrors(err error) map[string]string
-	CreateNewCustomer(ctx context.Context, user *types.Customer) error
-	LoginCustomer(ctx context.Context, email, password string) (string, error)
-	GenerateOTP() string
-	SendOTP(ctx context.Context, phoneNumber, email, Otp string) (any, error)
-	CheckOTP(ctx context.Context, email, otp string) error
-}
-
-func NewService(repo repository.RepoInterface, validator *validator.Validate) ServiceInterface {
+func NewService(customerRepo *repository.CustomerRepo, foodRepo *repository.FoodRepo,
+	orderRepo *repository.OrdersRepo, validator *validator.Validate) *Service {
 	return &Service{
-		repo:      repo,
-		Validator: validator,
+		customerRepo: customerRepo,
+		foodRepo:     foodRepo,
+		orderRepo:    orderRepo,
+		validator:    validator,
 	}
 }
+
+// type AuthServices interface {
+// 	GetValidationErrors(err error) map[string]string
+// 	CreateNewCustomer(ctx context.Context, user *types.Customer) error
+// 	LoginCustomer(ctx context.Context, email, password string) (string, error)
+// 	Validate(i any) error
+// }
+
+// type OTPServices interface {
+// 	GenerateOTP() string
+// 	SendOTP(ctx context.Context, phoneNumber, email, Otp string) (any, error)
+// 	CheckOTP(ctx context.Context, email, otp string) error
+// }

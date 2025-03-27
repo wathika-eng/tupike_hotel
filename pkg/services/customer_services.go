@@ -21,7 +21,7 @@ func (s *Service) CreateNewCustomer(ctx context.Context, user *types.Customer) e
 		return err
 	}
 	user.Password = hashedPass
-	err = s.repo.InsertCustomer(ctx, user)
+	err = s.customerRepo.InsertCustomer(ctx, user)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func (s *Service) CreateNewCustomer(ctx context.Context, user *types.Customer) e
 }
 
 func (s *Service) LoginCustomer(ctx context.Context, email, password string) (string, error) {
-	userFound, err := s.repo.LookUpCustomer(context.Background(), email)
+	userFound, err := s.customerRepo.LookUpCustomer(context.Background(), email)
 	if err != nil || userFound == nil {
 		return "", fmt.Errorf("user not found on the database: %v", err)
 	}
@@ -46,7 +46,7 @@ func (s *Service) LoginCustomer(ctx context.Context, email, password string) (st
 	if err != nil {
 		return "", fmt.Errorf("error while generating access token: %v", err)
 	}
-	s.repo.UpdateLoginTime(ctx, email)
+	s.customerRepo.UpdateLoginTime(ctx, email)
 	return accessToken, nil
 }
 

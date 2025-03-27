@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *CustomerHandler) CreateUser(c echo.Context) error {
+func (h *Handler) CreateUser(c echo.Context) error {
 
 	var customer *types.Customer
 
@@ -40,7 +40,7 @@ func (h *CustomerHandler) CreateUser(c echo.Context) error {
 		customer.Email)
 }
 
-func (h *CustomerHandler) LoginUser(c echo.Context) error {
+func (h *Handler) LoginUser(c echo.Context) error {
 	type CustomerLogin struct {
 		Email    string `json:"email" validate:"required,email"`
 		Password string `json:"password" validate:"required,min=8"`
@@ -65,7 +65,7 @@ func (h *CustomerHandler) LoginUser(c echo.Context) error {
 	})
 }
 
-func (h *CustomerHandler) VerifyOTP(c echo.Context) error {
+func (h *Handler) VerifyOTP(c echo.Context) error {
 	var OTP struct {
 		Email string `json:"email"`
 		Code  string `json:"code" validate:"required,max=4"`
