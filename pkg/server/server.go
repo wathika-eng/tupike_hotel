@@ -25,7 +25,7 @@ func NewServer() *http.Server {
 	// Initialize Database
 	db, err := database.NewDatabase()
 	if err != nil {
-		log.Fatalf("Error connecting to the database: %v", err)
+		log.Panicf("Error connecting to the database: %v", err)
 	}
 
 	// Initialize Redis Client
@@ -38,7 +38,7 @@ func NewServer() *http.Server {
 
 	// Check Redis Connection
 	if _, err := client.Ping(context.Background()).Result(); err != nil {
-		log.Fatalf("Could not connect to Redis: %v", err)
+		log.Panicf("Could not connect to Redis: %v", err)
 	}
 	log.Printf("connected to redis :%v", client)
 	// Initialize Server

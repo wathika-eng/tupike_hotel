@@ -43,7 +43,8 @@ type Order struct {
 	DeliveryStatus string    `json:"delivery_status" validate:"required" bun:"delivery_status,notnull,default:'pending'"`
 	PaymentStatus  bool      `json:"payment_status" bun:"payment_status,notnull,default:false"`
 	OrderedAt      time.Time `json:"ordered_at" bun:"ordered_at,notnull,default:current_timestamp"`
-	AmountTotal    int       `json:"amount_total" validate:"required,gt=0" bun:"amount_total,notnull"`
+	Quantity       int       `json:"order_quantity" validate:"required" bun:"order_quantity,default:1"`
+	AmountTotal    float64   `json:"amount_total" validate:"required,gt=0" bun:"amount_total,notnull"`
 	Discount       float64   `json:"discount" bun:"discount,notnull,default:0"`
 	Customer       *Customer `bun:"rel:belongs-to,join:customer_id=id"`
 	FoodItem       *FoodItem `bun:"rel:belongs-to,join:food_id=id"`

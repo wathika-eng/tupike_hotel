@@ -31,9 +31,9 @@ func (h *Handler) OrderFood(c echo.Context) error {
 		return resp.ErrorResponse(c, 400, "", err)
 	}
 
-	if err := h.service.Validate(&order); err != nil {
-		return resp.ErrorResponse(c, 400, "", err)
-	}
+	// if err := h.service.Validate(&order); err != nil {
+	// 	return resp.ErrorResponse(c, 400, "", err)
+	// }
 	err = h.service.PlaceOrder(c.Request().Context(), &order)
 	if err != nil {
 		return resp.ErrorResponse(c, 400, "", err)

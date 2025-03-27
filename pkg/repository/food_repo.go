@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"tupike_hotel/pkg/types"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -43,9 +44,19 @@ func (r *FoodRepo) GetFood(ctx context.Context) ([]types.FoodItem, error) {
 	return foods, nil
 }
 
-func (r *FoodRepo) LookupFood(ctx context.Context, foodName *types.FoodItem) (*types.FoodItem, error) {
+func (r *FoodRepo) LookupFood(ctx context.Context, identifier string) (*types.FoodItem, error) {
 	var food types.FoodItem
-	err := r.db.DB.NewSelect().Model(&food).Where("item = ?", foodName).Limit(1).Scan(ctx)
+
+	query := r.db.DB.NewSelect().Model(&food).Limit(1)
+
+	// Check if identifier is a valid UUID
+	if _, err := uuid.Parse(identifier); err == nil {
+		query.Where("id = ?", identifier) // Search by UUID
+	} else {
+		query.Where("item ILIKE ?", identifier) // Search by name (case-insensitive)
+	}
+
+	err := query.Scan(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New("food not found")
@@ -54,4 +65,17 @@ func (r *FoodRepo) LookupFood(ctx context.Context, foodName *types.FoodItem) (*t
 	}
 
 	return &food, nil
+}
+
+func (r *FoodRepo) UpdateFood(ctx context.Context,
+	food *types.FoodItem, orderedQuantity int) error {
+	_, err := r.db.DB.NewUpdate().Model(food).
+		Set("quantity = quantity - ?", orderedQuantity).
+		Set("order_freq = order_freq + ?", orderedQuantity).
+		Where("id = ? AND quantity >= ?", food.ID, orderedQuantity).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to update food data")
+	}
+	return nil
 }
