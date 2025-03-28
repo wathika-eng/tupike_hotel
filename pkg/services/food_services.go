@@ -16,3 +16,11 @@ func (s *Service) FetchFood(ctx context.Context) ([]types.FoodItem, error) {
 	}
 	return food, nil
 }
+
+func (s *Service) CheckFood(ctx context.Context, foodName string) (*types.FoodItem, error) {
+	foodData, err := s.foodRepo.LookupFood(ctx, foodName)
+	if err != nil {
+		return nil, err
+	}
+	return foodData, nil
+}

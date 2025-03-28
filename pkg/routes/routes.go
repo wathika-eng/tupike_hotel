@@ -28,6 +28,8 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	// 	MaxAge:           12 * time.Hour,
 	// }))
 	repo := repository.NewRepository(repository.NewDatabaseManager(db.GetDB(), client))
+	// uncomment if new database
+	// repo.FoodRepo.SeedFoodItems()
 	services := services.NewService(repo.CustomerRepo, repo.FoodRepo, repo.OrderRepo, validator.New())
 	handler := handlers.NewHandler(repo, services)
 
@@ -41,6 +43,7 @@ func SetupRoutes(db database.DBService, client *redis.Client) http.Handler {
 	api := e.Group("/api")
 	{
 		api.GET("/food", handler.GetFood)
+		api.POST("/food-search", handler.SearchFood)
 	}
 
 	apiAuth := e.Group("/api/auth")

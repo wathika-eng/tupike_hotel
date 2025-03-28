@@ -51,9 +51,9 @@ func (r *FoodRepo) LookupFood(ctx context.Context, identifier string) (*types.Fo
 
 	// Check if identifier is a valid UUID
 	if _, err := uuid.Parse(identifier); err == nil {
-		query.Where("id = ?", identifier) // Search by UUID
+		query.Where("id = ?", identifier)
 	} else {
-		query.Where("item ILIKE ?", identifier) // Search by name (case-insensitive)
+		query.Where("item ILIKE ?", identifier)
 	}
 
 	err := query.Scan(ctx)

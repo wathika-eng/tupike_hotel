@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 	resp "tupike_hotel/pkg/response"
 	"tupike_hotel/pkg/types"
 
@@ -39,4 +41,27 @@ func (h *Handler) GetFood(c echo.Context) error {
 	return c.JSON(200, echo.Map{
 		"food": food,
 	})
+}
+
+// search for food using UUID or food name, return all it's data
+func (h *Handler) SearchFood(c echo.Context) error {
+	type request struct {
+		Name string `json:"name" validete:"required"`
+	}
+	var req request
+	name := c.QueryParam("food")
+	if strings.TrimSpace(name) == "" {
+		if err := c.Bind(&req); err != nil {
+			return resp.ErrorResponse(c, http.StatusBadRequest, "", errors.New("request body cannot be empty"))
+		}
+		name = req.Name
+	}
+	if strings.TrimSpace(name) == "" {
+		return resp.ErrorResponse(c, http.StatusBadRequest, "", errors.New("request body cannot be empty"))
+	}
+	foodData, err := h.service.CheckFood(c.Request().Context(), name)
+	if err != nil {
+		return resp.ErrorResponse(c, http.StatusBadRequest, "", err)
+	}
+	return resp.SuccessResponse(c, http.StatusOK, "food found", foodData)
 }

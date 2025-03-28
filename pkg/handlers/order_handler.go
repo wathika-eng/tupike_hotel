@@ -11,13 +11,24 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CustomerID(c echo.Context) (uuid.UUID, error) {
+// logic to extract user ID from token
+func CustomerID(c echo.Context) (string, error) {
 	claims, ok := c.Get("claims").(jwt.MapClaims)
 	if !ok {
-		return uuid.Nil, errors.New("unauthorized")
+		return "", errors.New("unauthorized")
 	}
-	customerID, _ := claims["sub"].(uuid.UUID)
-	return customerID, nil
+	// (string)
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		return "", errors.New("invalid subject type")
+	}
+
+	customerID, err := uuid.Parse(sub)
+	if err != nil {
+		return "", errors.New("invalid uuid in sub")
+	}
+
+	return customerID.String(), nil
 }
 
 func (h *Handler) OrderFood(c echo.Context) error {
@@ -25,8 +36,11 @@ func (h *Handler) OrderFood(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, "unauthorized")
 	}
+	id, _ := uuid.Parse(customerID)
+
 	var order types.Order
-	order.CustomerID = customerID
+	order.CustomerID = id
+
 	if err := c.Bind(&order); err != nil {
 		return resp.ErrorResponse(c, 400, "", err)
 	}
